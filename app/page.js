@@ -1,101 +1,175 @@
-import Image from "next/image";
+
+"use client"
+import { CheckCircle } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [imageId, setImagePublicId] = useState("");
+  const [atsResult, setAtsResult] = useState(null);
+
+  const openWidget = () => {
+    const widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: "dac2viawa",
+        uploadPreset: "wkhqhjpw"
+      },
+      async (error, result) => {
+        if (result.event === "success") {
+          setImagePublicId(`https://res.cloudinary.com/dac2viawa/image/upload/v${result.info.version}/${result.info.public_id}.${result.info.format}`);
+
+          const response = await fetch(`/api/dwld`, {
+            method: 'POST',
+            headers: {
+              "Content-type": "application/json"
+            },
+            body: JSON.stringify(`https://res.cloudinary.com/dac2viawa/image/upload/v${result.info.version}/${result.info.public_id}.${result.info.format}`)
+          });
+
+          const d = await response.json();
+          if (response.ok) {
+            console.log('Image downloaded successfully!');
+          }
+        } else {
+          console.log(error);
+        }
+      }
+    );
+    widget.open();
+  };
+
+  const cleanAndParseJsonString = (responseString) => {
+    // Remove the backticks and "```json" from the start and the ending "```"
+    let jsonString = JSON.parse(responseString).text;
+
+    // Step 2: Remove unwanted artifacts like ```json and ``` 
+    jsonString = jsonString.replace(/```json|```/g, '');
+    
+    // Step 3: Parse the cleaned string as JSON
+    const parsedJson = JSON.parse(jsonString);
+    console.log(parsedJson);
+    try {
+      return parsedJson;  // Parse the cleaned string
+    } catch (error) {
+      console.error("Failed to parse JSON:", error);
+      return null;
+    }
+  };
+
+  const search = async () => {
+    const response = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: {
+        "Content-type": "application/json"
+      },
+      body: JSON.stringify(imageId)
+    });
+
+    const resText = await response.text();  // Fetch the response as a string
+    const parsedJson = cleanAndParseJsonString(resText);  // Clean and parse the JSON
+    if (parsedJson) {
+      setAtsResult(parsedJson);  // Set the parsed result in the state
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-teal-700 text-white p-8">
+      <header className="mb-12">
+        <h1 className="text-4xl font-bold mb-2">LiveCareer</h1>
+        <nav className="space-x-4">
+          <a href="#" className="hover:underline">Builders</a>
+          <a href="#" className="hover:underline">Resumes</a>
+          <a href="#" className="hover:underline">CV</a>
+          <a href="#" className="hover:underline">Cover Letters</a>
+          <a href="#" className="hover:underline">Resources</a>
+        </nav>
+      </header>
+
+      <main className="flex flex-col md:flex-row items-center justify-between">
+        <div className="md:w-1/2 mb-8 md:mb-0">
+          <h2 className="text-5xl font-bold mb-6">ATS Resume Checker: Review, score & improve your resume</h2>
+          <button onClick={openWidget} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+            Upload your Resume
+          </button>
+          {imageId && 
+            <button onClick={search} className="bg-orange-500 ml-4 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
+              Rate My Resume
+            </button>
+          }
         </div>
+        <div className="md:w-1/2 bg-white text-teal-700 p-6 rounded-lg shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-4xl font-bold">95</div>
+            <div className="text-right">
+              <div className="font-bold">GOOD WORK!</div>
+              <div>RESUME STRENGTH</div>
+            </div>
+          </div>
+          <p className="mb-4">Review our suggestions to see what you can fix.</p>
+          <ul className="space-y-2">
+            <li className="flex items-center"><CheckCircle className="text-green-500 mr-2" /> Completeness</li>
+            <li className="flex items-center"><CheckCircle className="text-green-500 mr-2" /> Word Choice</li>
+            <li className="flex items-center"><CheckCircle className="text-green-500 mr-2" /> Typos</li>
+          </ul>
+          <p className="mt-4 text-sm">Files we can read: DOC, DOCX, PDF, HTML, RTF, TXT</p>
+        </div>
+
+       
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      {atsResult && (
+          <div className=" bg-white text-teal-700 p-6 rounded-lg mt-8 shadow-lg">
+            <h3 className="text-4xl font-bold mb-4">Resume Analysis</h3>
+            <div className="mb-4">
+              <div className="font-bold text-2xl">Overall Score: {atsResult["Overall Score"]}</div>
+            </div>
+            <div className='flex '>
+              <div>
+            <div>
+            <h4 className="text-xl font-bold mb-2">Detailed Breakdown</h4>
+            <ul className="space-y-2">
+              {Object.entries(atsResult["Detailed Breakdown"]).map(([key, value]) => (
+                <li key={key} className="flex items-center"><CheckCircle className="text-green-500 mr-2" /> {key}: {value}</li>
+              ))}
+            </ul>
+            </div>
+            <div>
+            <h4 className="text-xl font-bold mt-4 mb-2">Strengths</h4>
+            <ul className="space-y-2">
+              {atsResult.Strengths.map((strength, index) => (
+                <li key={index} className="flex items-center"><CheckCircle className="text-green-500 mr-2" /> {strength}</li>
+              ))}
+            </ul>
+            </div>
+            </div>
+            <div>
+                <div>
+            <h4 className="text-xl font-bold mt-4 mb-2">Areas for Improvement</h4>
+            <ul className="space-y-2">
+              {atsResult["Areas for Improvement"].map((area, index) => (
+                <li key={index} className="flex items-center"><CheckCircle className="text-yellow-500 mr-2" /> {area}</li>
+              ))}
+            </ul>
+</div>
+
+<div>
+            <h4 className="text-xl font-bold mt-4 mb-2">Key Insights</h4>
+            <ul className="space-y-2">
+              {atsResult["Key Insights"].map((insight, index) => (
+                <li key={index} className="flex items-center"><CheckCircle className="text-blue-500 mr-2" /> {insight}</li>
+              ))}
+            </ul>
+            </div>
+            </div>
+</div>
+            <div className="mt-4">
+              <strong>Recommendation:</strong> {atsResult.Recommendation}
+            </div>
+            <div className="mt-2">
+              <strong>Additional Notes:</strong> {atsResult["Additional Notes"]}
+            </div>
+          </div>
+        )}
     </div>
   );
+            
 }

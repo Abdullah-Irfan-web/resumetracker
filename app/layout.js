@@ -20,6 +20,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+       <head>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <script
+          src="https://widget.Cloudinary.com/v2.0/global/all.js"
+          type="text/javascript"
+        ></script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
