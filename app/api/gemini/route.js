@@ -2,8 +2,6 @@
 "use server"
 import { NextResponse } from "next/server";
 
-import fs from "fs";
-import path from 'path';
 
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -13,12 +11,12 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 // Access your API key as an environment variable (see "Set up your API key" above)
 const genAI = new GoogleGenerativeAI('AIzaSyB3qLT6Ee-J964XkeZGr2SOPpSUpjFK4aI');
 
-function fileToGenerativePart(filePath) {
+function fileToGenerativePart(fileBuffer) {
     return {
       inlineData: {
-        data: Buffer.from(fs.readFileSync(filePath)).toString("base64"),
-        mimeType: "application/pdf"
-      },
+         data: Buffer.from(fileBuffer).toString("base64"),
+         mimeType: "application/pdf", // Change this if the file is not a PDF
+       },
     };
   }
   
@@ -128,10 +126,12 @@ export async function POST(request){
     Analyze the provided resume thoroughly and present your findings in the format specified above. Be objective, thorough, and provide constructive feedback.
     please provide the result in json format. Just provide the json objects (key-value) no strings
     `
+    const response = await fetch(body);
 
-    let filename = path.basename(body);
+    //let filename = path.basename(body);'
+    const fileBuffer = await response.arrayBuffer();
     const pdfParts = [
-        fileToGenerativePart("public/downloads/" + filename),
+        fileToGenerativePart(fileBuffer),
       ];
 
       try {

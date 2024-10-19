@@ -18,22 +18,16 @@ export default function Home() {
         if (result.event === "success") {
           setImagePublicId(`https://res.cloudinary.com/dac2viawa/image/upload/v${result.info.version}/${result.info.public_id}.${result.info.format}`);
 
-          const response = await fetch(`/api/dwld`, {
-            method: 'POST',
-            headers: {
-              "Content-type": "application/json"
-            },
-            body: JSON.stringify(`https://res.cloudinary.com/dac2viawa/image/upload/v${result.info.version}/${result.info.public_id}.${result.info.format}`)
-          });
+         
 
-          const d = await response.json();
-          if (response.ok) {
+        
             console.log('Image downloaded successfully!');
           }
-        } else {
-          console.log(error);
-        }
-      }
+          else {
+            console.log(error);
+          }
+        } 
+  
     );
     widget.open();
   };
