@@ -18,7 +18,7 @@ export default function Home() {
         if (result.event === "success") {
           setImagePublicId(`https://res.cloudinary.com/dac2viawa/image/upload/v${result.info.version}/${result.info.public_id}.${result.info.format}`);
 
-          const response = await fetch(`/api/dwld`, {
+          const response = await fetch(`https://resumetracker.vercel.app/api/dwld`, {
             method: 'POST',
             headers: {
               "Content-type": "application/json"
@@ -57,7 +57,7 @@ export default function Home() {
   };
 
   const search = async () => {
-    const response = await fetch('/api/gemini', {
+    const response = await fetch('https://resumetracker.vercel.app/api/gemini', {
       method: 'POST',
       headers: {
         "Content-type": "application/json"
