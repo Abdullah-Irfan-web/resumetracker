@@ -130,7 +130,7 @@ export default function Home() {
     return (
       <li key={index} className="flex items-center">
         <CheckCircle className="text-green-500 mr-2" />
-        {key}: {value[0]} {value[1]} {/* Access the array values */}
+        {key}: {value[0]}/{value[1]} {/* Access the array values */}
       </li>
     );
   })}
