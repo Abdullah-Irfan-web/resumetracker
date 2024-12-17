@@ -41,7 +41,7 @@ export default function Home() {
     
     // Step 3: Parse the cleaned string as JSON
     const parsedJson = JSON.parse(jsonString);
-    console.log(parsedJson);
+  
     try {
       return parsedJson;  // Parse the cleaned string
     } catch (error) {
@@ -63,6 +63,8 @@ export default function Home() {
     const parsedJson = cleanAndParseJsonString(resText);  // Clean and parse the JSON
     if (parsedJson) {
       setAtsResult(parsedJson);  // Set the parsed result in the state
+      console.log("Detailed Breakdown:", parsedJson["Detailed Breakdown"]);
+
     }
   };
 
@@ -121,10 +123,18 @@ export default function Home() {
             <div>
             <h4 className="text-xl font-bold mb-2">Detailed Breakdown</h4>
             <ul className="space-y-2">
-              {Object.entries(atsResult["Detailed Breakdown"]).map(([key, value]) => (
-                <li key={key} className="flex items-center"><CheckCircle className="text-green-500 mr-2" /> {key}: {value}</li>
-              ))}
-            </ul>
+  {atsResult["Detailed Breakdown"].map((item, index) => {
+    // Extract the key and value from the object
+    const [key, value] = Object.entries(item)[0]; // Destructure the first key-value pair
+
+    return (
+      <li key={index} className="flex items-center">
+        <CheckCircle className="text-green-500 mr-2" />
+        {key}: {value[0]} {value[1]} {/* Access the array values */}
+      </li>
+    );
+  })}
+</ul>
             </div>
             <div>
             <h4 className="text-xl font-bold mt-4 mb-2">Strengths</h4>

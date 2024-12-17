@@ -100,13 +100,13 @@ export async function POST(request){
     
     1. Overall Score: [X/100]
     
-    2. Detailed Breakdown:
-       - Technical Skills Match: [X/40]
-       - Experience Relevance: [X/25]
-       - Problem-Solving/DSA: [X/15]
-       - Soft Skills: [X/10]
-       - Education and Certifications: [X/5]
-       - Achievements and Impact: [X/5]
+    2. Detailed Breakdown(Should be array):
+        [Technical Skills Match: [X/40]],
+       [Experience Relevance: [X/25]],
+        [Problem-Solving/DSA: [X/15]],
+       [Soft Skills: [X/10]],
+       [Education and Certifications: [X/5]],
+       [Achievements and Impact: [X/5]]
     
     3. Strengths:
        [List top 3-5 strengths of the candidate]
@@ -143,7 +143,7 @@ export async function POST(request){
     
         const response = await result.response;
         const text = response.text();
-        console.log("PDF Analysis:", text);
+       console.log(text)
         return NextResponse.json({text});
     
     
